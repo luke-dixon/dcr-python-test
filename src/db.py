@@ -40,16 +40,27 @@ class Region(DBO):
 
 
 class Country(DBO):
-    def insert(self, name, alpha2Code, alpha3Code, population, region_id):
+    def insert(self, name, alpha2Code, alpha3Code, population, region_id, capital):
         insert_query = (
             "INSERT INTO country (name, alpha2Code, alpha3Code, population, "
-            "region_id) VALUES (?, ?, ?, ?, ?)"
+            "region_id, capital) VALUES (?, ?, ?, ?, ?, ?)"
         )
         self.cursor.execute(
-            insert_query, (name, alpha2Code, alpha3Code, population, region_id)
+            insert_query, (name, alpha2Code, alpha3Code, population, region_id, capital)
         )
         conn.commit()
         self.get_by_name(name)
+
+    def update(self, name, alpha2Code, alpha3Code, population, region_id, capital):
+        update_query = (
+            "UPDATE country SET name = ?, alpha2Code = ?, alpha3Code = ?, "
+            "population = ?, region_id = ?, capital = ? "
+            "WHERE id = ?"
+        )
+        self.cursor.execute(
+            update_query, (name, alpha2Code, alpha3Code, population, region_id, capital, self.data["id"])
+        )
+        conn.commit()
 
     def get_by_name(self, name):
         select_query = "SElECT * FROM country WHERE name=?"
@@ -77,3 +88,25 @@ class Country(DBO):
             obj = cls()
             obj.data = {k: v for k, v in zip(headers, row)}
             yield obj
+
+
+class CountryTopLevelDomain(DBO):
+    def insert(self, country_id, name):
+        insert_query = (
+            "INSERT INTO country_top_level_domain_name (country_id, name) "
+            "VALUES (?, ?)"
+        )
+        self.cursor.execute(
+            insert_query, (country_id, name)
+        )
+        conn.commit()
+
+    @classmethod
+    def clear_for_country(cls, country_id):
+        dbo = DBO()
+        delete_statement = """
+            DELETE FROM country_top_level_domain_name
+            WHERE country_id = ?
+            """
+        dbo.cursor.execute(delete_statement, (country_id,))
+        conn.commit()

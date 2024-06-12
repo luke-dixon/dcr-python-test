@@ -1,0 +1,16 @@
+To update the country table to include the capital field, run the following:
+
+```
+ALTER TABLE country ADD COLUMN capital TEXT;
+```
+
+To create the table for country code top level domain names (TLDs):
+
+```
+CREATE TABLE IF NOT EXISTS country_top_level_domain_name (
+    id INTEGER PRIMARY KEY,
+    country_id INTEGER,
+    name TEXT,
+    FOREIGN KEY (country_id) REFERENCES country(id)
+);
+```
