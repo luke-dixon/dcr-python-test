@@ -1,4 +1,5 @@
 import json
+import urllib.request
 
 from db import Country, Region
 
@@ -46,5 +47,15 @@ class LoadData:
             self.add_country(row)
 
 
+class LoadDataHTTP(LoadData):
+    URL = "https://storage.googleapis.com/dcr-django-test/countries.json"
+
+    def get_raw_data(self):
+        # urllib.http.HTTPError for non-200 status codes
+        # urllib.error.URLError is raised for connection errors
+        response = urllib.request.urlopen(self.URL)
+        return json.load(response)
+
+
 if __name__ == "__main__":
-    LoadData().run()
+    LoadDataHTTP().run()
